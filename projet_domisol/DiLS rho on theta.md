@@ -2,10 +2,10 @@ $\rho = 4 * N_e * r$
 $\theta = 4 * N_e* \mu$
 $\frac{\rho}{\theta} = \frac{r}{\mu}$
 
-## millet (to recheck the result is weird)
-$r=3.54e-6$
+## millet 
+$r=3.54e-8$
 $\mu=1e-8$
-$\frac{\rho}{\theta}=354$
+$\frac{\rho}{\theta}=3.54$
 ## riz africain
 $r=4.4e-8$
 $\mu=1e-8$
