@@ -1,0 +1,70 @@
+Tag : #Method 
+# Input file format
+
+| chr_phy | phy_pos | chr_gen | gen_pos |
+|---|---|---|---|
+| physical chr| physical position (in base)| genetic chr | genetic position |
+
+# 1. Load data (to edit if rerun)
+```{r,echo=T}
+data = read.table('~/Domisol_thesis/rawdata_system/maize/carte_maize.txt',h=T)
+data$phy_pos = data$coordinate # i just rename this column to match the column syntax 
+head(data)
+```
+# 2. Exemple for one chromosome
+
+```{r,echo=T}
+data$phy_pos = data$phy_pos / 1e6 # transform base position in Mb position
+
+smooth_strengh = 0.7 # choose a value between 0 and +infinite.
+#The higher is the value, the smoother the map will be
+
+sub_data = subset(data,subset = chr_phy == 1)
+sm = smooth.spline(x=sub_data$phy_pos,y=sub_data$gen_pos,spar=smooth_strengh)
+
+### check if the smooth is enough
+predx = seq(0.1,max(sub_data$phy_pos),by=0.1)
+predy = predict(sm,x=predx,deriv=0)$y
+plot(sub_data$phy_pos,sub_data$gen_pos,type='p')
+lines(predx,predy,col='red')
+#### you must obtain a growing monotonous dot line , and the red line must be in the dot line.
+
+pred_deriv = predict(sm,x=predx,deriv=1)$y
+plot(predx,pred_deriv,type='l',xlab='position (Mb)',ylab='rec_rate (cM/Mb)')
+# here the map seems smooth enough to remove all the noise
+
+sub_rec_map = data.frame('chr'=1,'start' = predx - (0.1/2 - 1e-6) , 
+						 'end' = predx + 0.1/2 , 'rec_rate' = pred_deriv) 
+head(sub_rec_map)
+```
+The map generated express the recombination rate in cM/Mb. The recombination rate is express
+in probability of recombination per base, per generation, per individual.
+Furthermore, the physical position (start and end) are express in Mb too, which doesn’t match 
+the file format use in RIDGE (which is in pb)
+
+| chr | start (bp) | end (bp) | rec_rate |
+|-----|------------|----------|----------|
+| chr name | start position | end position of window | recombination rate |
+
+# 3. Transform cM/Mb to recombination rate using haldane transformation
+
+$d_{AB} = - 50.ln(1-2.r_{AB})$
+
+with $d_{AB}$ the genetic distance between A and B in cM. Our map give us a result in cM,
+so
+
+$\frac{cM}{Mb}.Mb=d_{AB}$
+
+And $r_{AB}$ is the recombination rate between A and B. So $r_{AB}$ is equal to 
+
+$r_{AB}=\frac{1-e^{d_{AB}/-50}}{2}$
+
+
+```{r}
+sub_rec_map$rec_rate = sub_rec_map$rec_rate * 0.1 / 1e5 #to transform into d_AB / locus 
+#size to set the distance between d_AB at 1 base
+sub_rec_map$rec_rate = (1-exp(sub_rec_map$rec_rate/-50))/2
+sub_rec_map$start = sub_rec_map$start * 1e6
+sub_rec_map$end = sub_rec_map$end * 1e6
+head(sub_rec_map)
+```
