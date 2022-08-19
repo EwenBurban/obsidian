@@ -11,8 +11,7 @@ Before running RIDGE, the user must define multiples parameters : 
 - $window\_size$ : 
 - $ligth\_mode$ : 
 - $timeStamp$ :
-- $nameA,nameB$
-- 
+- $nameA,nameB$ :  
 - $Tsplit\_min,Tsplit\_max$
 - $N\_min,N\_max$
 - $M\_min,M\_max$
@@ -23,8 +22,8 @@ Before infering the gene flow barries, raw data must be treated, in order to be 
 ### Sampling loci
 To perform simulation and ABC inference, RIDGE use a subsample of the whole genome and make the hypothesis that the subsample is representativ from the rest of the genome. To generate the subsample, the whole genome is divided in window of $window\_size$ bp ($window\_ size$ is defined by the user). The user define the number of loci that are sample per chromosome. Once the subsample is defined, two files are generated : _locus_dataset_ ; _ABCstat_global.txt_. 
 _locus_dataset_ contain basic information for each sampled loci -- the locus length ; the number of haplotype in population A and B and the sum of the two pop ; locus diversity $\theta$ as $\theta=4*N_{ref}*\mu*locus\_length$ ; locus number of recombination $\rho$ as $\rho = 4 * N_{ref}* r * locus\_length$. RIDGE make the hypothesis that $\mu$ is constant across genomo, but $r$ (recombination rate) is heterogeneous. To get local $r$ and so $\rho$, the user must provide a recombination map. The information contain in _locus_datafile_ will be use to simulate 
-ABCstat_global.txt is the summary statistics of the subsample of loci (see[Summary statistics use in ABC process](RIDGE/Summary%20statistics%20use%20in%20ABC%20process.md) for details).
-In addition to the first subsample generated for demographic inference
+ABCstat_global.txt is the summary statistics of the subsample of loci (see[Summary statistics use in ABC process](RIDGE/Summary%20statistics%20use%20in%20ABC%20process.md) for details). Also, summary statistics are calculated for every loci and stored in _ABCstat_locus.txt_.
+In addition to the first subsample generated for demographic inference, a larger sample (x10 larger) is generated specificaly for the part where the locus specific simulations. The purpose of this sample is just to generate _locus_datafile_locussp_ file. 
 
 ```mermaid
 graph TD
@@ -38,13 +37,14 @@ EB ---> | get loci data | FB[locus_datafile_locussp]
 E ---> | get sample abc stat| G[ABCstat_global.txt]
 D ---> | get all loci abc stat| H[ABCstat_locus.txt]
 ```
-## core part
+## Core part
+The core part aim to infer the proportion of barrier in genome and the putative position of each gene flow barrier loci. Because, the signature of a gene flow barrier depend of the demography, RIDGE firstly infer the demographic scenario before infering the $P_{barrier}$ of each locus. Demographic inference is ensured by a ABC method optimized by machine learning alghorithm (random forest from __abcrf__ package). At the beginning, simulation prior are uniformly drafted between bound defined by user following the describde method here :  [Generating simulation priors and proceed to simulation](RIDGE/Generating%20simulation%20priors%20and%20proceed%20to%20simulation.md). Simulation are runned under 14 different models as descrided here : [demographic models to work with ABC](RIDGE/demographic%20models%20to%20work%20with%20ABC.md) and each dataset are resume using the same ABC summary than used for the provided dataset (see [Summary statistics use in ABC process](RIDGE/Summary%20statistics%20use%20in%20ABC%20process.md)). After this first round of simulation, the contribution of each model in data explanation is estimated by random forest alghorithm. Only the models that are in 95% of the cumulative sum of models weigth are keept (named filtered models), the rest of models is rejected. Posterior of observed dataset are estimated using each filtered models simulation(==need to create note==). Then posteriors become simulation priors, simulation are run and posterior are estimated. This loop run $x$ times ($x=  1$ if ligthmodel is activated, else $x=5$), and make prior converge closer to observed data. From those optimized priors and simulation, the contribution of models is re-estimated (as described before) and used to sample posterior as sampling probability. Sampled posterior are merged inside _locus_posterior_mw.txt_ file, using some rules to concile different and potentialy incompatible models together (see ==need to create note==). From average posterior and _locus_datafile_locusssp_ locus specific simulation are generated (it means that rather having average summary statistics over thousands of loci, locus specific simulation give information for each locus) using an IM_2M_2N with half of loci simulated with migration and the other half as gene flow barrier (no migration).  
 ```mermaid
 graph TD
 
 
 C[ABCstat_global.txt & locus_datafile] ---> | produce simulation | D[simulated dataset of model 1]
-C ---> | produc simulation| DB[simulated dataset of model X]
+C ---> | produce simulation| DB[simulated dataset of model X]
 D ---> E[model filtering] 
 DB ---> E
 E ---> F[pertinent models]
