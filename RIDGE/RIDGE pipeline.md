@@ -7,14 +7,14 @@ RIDGE is divided in 4 parts : 
 
 ## Configuration
 Before running RIDGE, the user must define multiples parameters : 
-- $\mu$ : 
-- $window\_size$ : 
-- $ligth\_mode$ : 
-- $timeStamp$ :
-- $nameA,nameB$ :  
-- $Tsplit\_min,Tsplit\_max$
-- $N\_min,N\_max$
-- $M\_min,M\_max$
+- $\mu$ :  mutation rate per base
+- $window\_size$ : size of loci (in bp)
+- $ligth\_mode$ : activate ligth mode, which is faster and less accurate than default mode (TRUE or FALSE)
+- $timeStamp$ : path to data
+- $nameA,nameB$ :  name of populations used in popfile.csv ( A is the first population in popfile)
+- $Tsplit\_min,Tsplit\_max$ : bounds of Tsplit values (in generation)
+- $N\_min,N\_max$ : bounds of effective size 
+- $M\_min,M\_max$ : bounds of migration rate (N.m)
 - 
 ## Input part
 ### Formating raw data
@@ -38,7 +38,8 @@ E ---> | get sample abc stat| G[ABCstat_global.txt]
 D ---> | get all loci abc stat| H[ABCstat_locus.txt]
 ```
 ## Core part
-The core part aim to infer the proportion of barrier in genome and the putative position of each gene flow barrier loci. Because, the signature of a gene flow barrier depend of the demography, RIDGE firstly infer the demographic scenario before infering the $P_{barrier}$ of each locus. Demographic inference is ensured by a ABC method optimized by machine learning alghorithm (random forest from __abcrf__ package). At the beginning, simulation prior are uniformly drafted between bound defined by user following the describde method here :  [Generating simulation priors and proceed to simulation](RIDGE/Generating%20simulation%20priors%20and%20proceed%20to%20simulation.md). Simulation are runned under 14 different models as descrided here : [demographic models to work with ABC](RIDGE/demographic%20models%20to%20work%20with%20ABC.md) and each dataset are resume using the same ABC summary than used for the provided dataset (see [Summary statistics use in ABC process](RIDGE/Summary%20statistics%20use%20in%20ABC%20process.md)). After this first round of simulation, the contribution of each model in data explanation is estimated by random forest alghorithm. Only the models that are in 95% of the cumulative sum of models weigth are keept (named filtered models), the rest of models is rejected. Posterior of observed dataset are estimated using each filtered models simulation(==need to create note==). Then posteriors become simulation priors, simulation are run and posterior are estimated. This loop run $x$ times ($x=  1$ if ligthmodel is activated, else $x=5$), and make prior converge closer to observed data. From those optimized priors and simulation, the contribution of models is re-estimated (as described before) and used to sample posterior as sampling probability. Sampled posterior are merged inside _locus_posterior_mw.txt_ file, using some rules to concile different and potentialy incompatible models together (see ==need to create note==). From average posterior and _locus_datafile_locusssp_ locus specific simulation are generated (it means that rather having average summary statistics over thousands of loci, locus specific simulation give information for each locus) using an IM_2M_2N with half of loci simulated with migration and the other half as gene flow barrier (no migration).  
+The core part aim to infer the proportion of barrier in genome and the putative position of each gene flow barrier loci. Because, the signature of a gene flow barrier depend of the demography, RIDGE firstly infer the demographic scenario before infering the $P_{barrier}$ of each locus. Demographic inference is ensured by a ABC method optimized by machine learning alghorithm (random forest from __abcrf__ package). At the beginning, simulation prior are uniformly drafted between bound defined by user following the describde method here :  [Generating simulation priors and proceed to simulation](RIDGE/Generating%20simulation%20priors%20and%20proceed%20to%20simulation.md). Simulation are runned under 14 different models as descrided here : [demographic models to work with ABC](RIDGE/demographic%20models%20to%20work%20with%20ABC.md) and each dataset are resume using the same ABC summary than used for the provided dataset (see [Summary statistics use in ABC process](RIDGE/Summary%20statistics%20use%20in%20ABC%20process.md)). After this first round of simulation, the contribution of each model in data explanation is estimated by random forest alghorithm. Only the models that are in 95% of the cumulative sum of models weigth are keept (named filtered models), the rest of models is rejected. Posterior of observed dataset are estimated using each filtered models simulation(see [Models Weights and Posteriors estimation](RIDGE/Models%20Weights%20and%20Posteriors%20estimation.md)). Then posteriors become simulation priors, simulation are run and posterior are estimated. This loop run $x$ times ($x=  1$ if ligthmodel is activated, else $x=5$), and make prior converge closer to observed data. From those optimized priors and simulation, the contribution of models is re-estimated (as described before) and used to sample posterior as sampling probability. Sampled posterior are merged inside _locus_posterior_mw.txt_ file, using some rules to concile different and potentialy incompatible models together (see [Posteriors averaging](RIDGE/Posteriors%20averaging.md)). From average posterior and _locus_datafile_locusssp_ locus specific simulation are generated (it means that rather having average summary statistics over thousands of loci, locus specific simulation give information for each locus) using an IM_2M_2N with half of loci simulated with migration and the other half as gene flow barrier (no migration).  With locus simulation, the probability of being a barrier of each obseved loci is estimated. Barrier probability is the number of tree that voted for barrier classe over all trees from the random forest trained with locus simulations. 
+Because alone, the barrier probability is not very usefull, RIDGE evaluate his ability to detect barriers on the observed dataset through production of True and False positive rate for each threshold of Pbarr values [0,1], and the number of loci with a $Pbarr_i>threshold$. All those informations allow to the user to choose a pertinent threshold to define in his observed dataset, which loci is a barrier. himself and produce a roc curve. 
 ```mermaid
 graph TD
 

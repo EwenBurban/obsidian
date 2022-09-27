@@ -92,13 +92,13 @@ I used the sames datataset than previously and run the new version of the script
 ![Fig 5 : ** ](RIDGE/fig/SI_1N_posterior_estimation_v1.jpg)
 On this first version of 'mean + RNMAE', there is 2 problems : 
 1. as seen in Fig 5, the normal distribution is not limited to priors boundaries
-2. the witdh of the distribution is large, due to the fact that I used the RNMAE as sd, meaning that the mean error rate represent 68% of the value. By dividing RNMAE by 3 and using it as sd, RNMAE represent 99.73% of value
-__In V2 version, the normal distribution are bonded to priors boundaries and sd = RNMAE/3__
-![](RIDGE/fig/Standard_deviation_diagram.svg.png)
+2. the witdh of the distribution is large, due to the fact that I used $\sqrt{error.variance}$ the as sd, 
+__In V2 version, the normal distribution are bonded to priors boundaries and sd = $\sqrt{error.variance}$
+
 ###### SI_1N V2
-![](RIDGE/fig/SI_1N_posterior_estimation_v2.jpg)
+
 ###### SI_2N V2
-![](RIDGE/fig/SI_2N_posterior_estimation_v2.jpg)
+
 #TODO : convert 1 dataset DILS and compare to RIDGE estimation (to 10 rep)
 #TODO : test with another param set (Tsplit =  50000) with RIDGE
 
@@ -107,24 +107,4 @@ __In V2 version, the normal distribution are bonded to priors boundaries and sd 
 
 #### Discussion
 
-## Improvements
-- increase the quality and robustness of inferences from neural networks 
-- make a better choice of variable use in neural networks
 
-### Increasing the number of nnet and the size of it ^598726
-Before my improvements, the default parameters were set up to ==10== neural networks (NN) and only 10 layers. The more neural networks there is, more robust are the results. 
-With only 10 NN, the result were very random from one inference to another. So i increased it to various valuer (100,200,500,1000) and 200 NN seems to be a good compromise between robustness and computation time. For real use of RIDGE i’ll set up to 1000 NN (to be sure).
-
-### The choice of variable use in NN ^4ab9d0
-
-==trop tôt et trop intégré== 
-To resume a dataset, RIDGE use various summary statistics (see [[Summary statistics use in ABC process]]). By default, DILS propose to remove all the pearson correlation and global joint sfs description (ss_noSf, ss_sf, noSs_sf, noSs_noSf). I tested various combination : 
-- NULL : no variable are rejected 
-- DILS : reject pearson + global sfs description (ss_noSf, ss_sf, noSs_sf, noSs_noSf)
-- DILS_med : reject DiLS mode + median 
-- CV : all the variable with a cv < 0.1 are rejected
-- ALL : DILS mode + CV mode
-
-![[fig/mse_posterior_estimate.pdf]]
-**Fig 1** :e- normalised root mean square error (NRMSE) for each model to predict parameters 
-(Tsplit,Na,N1,N2) of an IM_2M_2N model.
