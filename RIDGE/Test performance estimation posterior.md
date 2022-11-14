@@ -105,6 +105,16 @@ __In V2 version, the normal distribution are bonded to priors boundaries and sd 
 ##### test on IM_2M_2N
 ##### test on IM_2M_2N with 5 runs of estimation and model averaging
 
+
+## New test : 
+
+1. Test 
+
+method 1 : gamma distribution from abcrf (difficult to explain : only knowledge limitation and limit of time explain such choice)
+method 2 : multioutput regression => https://scikit-learn.org/stable/modules/generated/sklearn.multioutput.RegressorChain.html#sklearn.multioutput.RegressorChain
+control method  (neural network from DiLS)
+
+
 #### Discussion
 
 

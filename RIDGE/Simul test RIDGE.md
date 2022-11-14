@@ -13,7 +13,17 @@ Else add a round.
 True roc curve
 #### status : 
 - modelcomp : running
-- 
+- round 2 , 3 et 4 done
+- DONE
+#### results
+| round | AUC |
+|---|---|
+|2| 0.722 |
+|3|0.74|
+|4|0.774|
+There is no real interest to use 5 round of prior optimisation
+estimated roc curve overestimated the true performances.
+
 ### effect of demographic parameters on BI
 #### Data :
 Dataset are simulated with the following parameters

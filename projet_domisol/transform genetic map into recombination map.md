@@ -63,7 +63,7 @@ $r_{AB}=\frac{1-e^{d_{AB}/-50}}{2}$
 ```{r}
 sub_rec_map$rec_rate = sub_rec_map$rec_rate * 0.1 / 1e5 #to transform into d_AB / locus 
 #size to set the distance between d_AB at 1 base
-sub_rec_map$rec_rate = (1-exp(sub_rec_map$rec_rate/-50))/2
+sub_rec_map$rec_rate = (1-exp(sub_rec_map$rec_rate*100 /-50))/2
 sub_rec_map$start = sub_rec_map$start * 1e6
 sub_rec_map$end = sub_rec_map$end * 1e6
 head(sub_rec_map)

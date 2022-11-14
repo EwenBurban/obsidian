@@ -40,3 +40,10 @@ average ~ 500 snp, so the mean is over 5e5 SNP.
 In conclusion, for pi, Fst, $\theta_W$ and Tajima’s D  the simulated dataset is very close from the expected values.
 
 ## 3. DiLS estimation vs RIDGE estimation
+### Data
+1 loci of 4 samples and 8 SNP
+Theorical calculus done by hand
+### Method
+run DiLS and RIDGE script to calculate the values
+### Evaluation
+Compare the difference of result between all three method for : $\pi$, $\theta$ ,TajD, Fst, Dxy, Da, jsfs summary stats (ss,sf,sxa,sxb)
